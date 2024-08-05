@@ -3,8 +3,10 @@ import { useState } from "react";
 import NavBar from "./components/NavBar/NavBar";
 import Main from "./components/Main/Main";
 import SearchBar from "./components/NavBar/components/SearchBar";
-import Logo from "./components/NavBar/components/Logo";
 import NumResults from "./components/NavBar/components/NumResults";
+import ListBox from "./components/Main/components/ListBox/ListBox";
+import WatchedBox from "./components/Main/components/WatchedBox/WatchedBox";
+import MovieList from "./components/Main/components/ListBox/components/MovieList";
 
 import { tempMovieData } from "./data/tempData";
 
@@ -22,7 +24,12 @@ export default function App() {
         />
         <NumResults movies={movies} />
       </NavBar>
-      <Main movies={movies} />
+      <Main>
+        <ListBox>
+          <MovieList movies={movies} />
+        </ListBox>
+        <WatchedBox />
+      </Main>
     </>
   );
 }
