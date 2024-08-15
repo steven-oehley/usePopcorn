@@ -18,12 +18,15 @@ const apiUrl = process.env.REACT_APP_API_URL;
 
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [query, setQuery] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [watched, setWatched] = useState(() => {
+    const storedMovies = localStorage.getItem("watchedMovies");
+    return JSON.parse(storedMovies);
+  });
 
   const debouncedQuery = useDebounce(inputValue, 500);
 
@@ -34,19 +37,27 @@ export default function App() {
   const handleSelectMovie = (id) =>
     selectedId === id ? setSelectedId(null) : setSelectedId(id);
 
+  const handleDuplicateRating = (movieToAdd, userRating) => {
+    setWatched((prevMovies) =>
+      prevMovies.map((movie) =>
+        movie.imdbID === movieToAdd.imdbID ? { ...movie, userRating } : movie
+      )
+    );
+    handleCloseMovie();
+  };
+
+  const handleRating = (movieToAdd, userRating) => {
+    setWatched((prevMovies) => [...prevMovies, { ...movieToAdd, userRating }]);
+    handleCloseMovie();
+  };
+
   const handleAddWatchedMovie = (movieToAdd, userRating) => {
     if (containsId(movieToAdd.imdbID)) {
-      setWatched((prevMovies) =>
-        prevMovies.map((movie) =>
-          movie.imdbID === movieToAdd.imdbID ? { ...movie, userRating } : movie
-        )
-      );
-      handleCloseMovie();
+      handleDuplicateRating(movieToAdd, userRating);
       return;
     }
 
-    setWatched((prevMovies) => [...prevMovies, { ...movieToAdd, userRating }]);
-    handleCloseMovie();
+    handleRating(movieToAdd, userRating);
   };
 
   const handleDeleteMovie = (id) =>
@@ -84,6 +95,10 @@ export default function App() {
 
     return () => controller.abort();
   }, [query]);
+
+  useEffect(() => {
+    localStorage.setItem("watchedMovies", JSON.stringify(watched));
+  }, [watched]);
 
   return (
     <>
