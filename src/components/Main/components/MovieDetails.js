@@ -16,7 +16,6 @@ function MovieDetails({
   // Destructure movie details
   const {
     Title: title,
-    Year: year,
     Poster: poster,
     Runtime: runtime,
     imdbRating,
