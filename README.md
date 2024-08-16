@@ -74,7 +74,7 @@ The project uses Tailwind CSS for styling, with additional custom styles defined
 
 The project is organized as follows:
 
-\`\`\`
+```
 ├── public
 ├── src
 │ ├── components
@@ -92,7 +92,7 @@ The project is organized as follows:
 │ ├── App.js
 │ └── index.js
 └── package.json
-\`\`\`
+```
 
 ## Custom Hooks
 
