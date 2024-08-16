@@ -21,7 +21,7 @@ export default function App() {
   const [inputValue, setInputValue] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [watched, setWatched] = useLocalStorageState([], "watchedMovies");
-  console.log(process.env.REACT_APP_API_URL);
+
   const debouncedQuery = useDebounce(inputValue, 500);
 
   const containsId = (id) => watched.some((movie) => movie.imdbID === id);
