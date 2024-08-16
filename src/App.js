@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import useDebounce from "./hooks/useDebounce";
+import { useDebounce } from "./hooks/useDebounce";
+import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
 import NavBar from "./components/NavBar/NavBar";
 import Main from "./components/Main/Main";
@@ -18,10 +19,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  const [watched, setWatched] = useState(() => {
-    const storedMovies = localStorage.getItem("watchedMovies");
-    return storedMovies ? JSON.parse(storedMovies) : [];
-  });
+  const [watched, setWatched] = useLocalStorageState([], "watchedMovies");
 
   const debouncedQuery = useDebounce(inputValue, 500);
 
@@ -70,10 +68,6 @@ export default function App() {
   useEffect(() => {
     setQuery(debouncedQuery); // Update the query state when debounced value changes
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    localStorage.setItem("watchedMovies", JSON.stringify(watched));
-  }, [watched]);
 
   return (
     <>
