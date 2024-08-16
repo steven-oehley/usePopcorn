@@ -26,19 +26,29 @@ This is a React application for managing and exploring movies. Users can search 
 
 To get started with the project, clone the repository and install the necessary dependencies:
 
-\`\`\`bash
+```
 git clone https://github.com/your-username/movie-management-app.git
 cd movie-management-app
 npm install
-\`\`\`
+```
 
 ## Usage
 
 To run the application locally, use:
 
-\`\`\`bash
+```
 npm start
-\`\`\`
+```
+
+Create a .env file 
+In the .env place two variables:
+
+```
+REACT_APP_API_URL=http://www.omdbapi.com/
+REACT_APP_API_KEY=YOUR_KEY_HERE
+```
+
+You can get an api key from <a href="">https://www.omdbapi.com/</a>
 
 The application will be available at \`http://localhost:3000\`.
 
