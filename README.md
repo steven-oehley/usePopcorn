@@ -48,7 +48,7 @@ REACT_APP_API_URL=http://www.omdbapi.com/
 REACT_APP_API_KEY=YOUR_KEY_HERE
 ```
 
-You can get an api key from <a href="">https://www.omdbapi.com/</a>
+You can get an api key from <a href="https://www.omdbapi.com/">OMDBApi</a>
 
 The application will be available at \`http://localhost:3000\`.
 
