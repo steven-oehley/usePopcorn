@@ -1,10 +1,7 @@
 import Loader from "./Loader";
 import StarRating from "../../StarRating";
-
 import { useEffect, useState } from "react";
-
-const apiKey = process.env.REACT_APP_API_KEY;
-const apiUrl = process.env.REACT_APP_API_URL;
+import { useFetchMovie } from "../../../hooks/useFetchMovie";
 
 function MovieDetails({
   selectedId,
@@ -12,11 +9,11 @@ function MovieDetails({
   onAddWatchedMovie,
   watched,
 }) {
-  const [movieDetails, setMovieDetails] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
   const [rating, setRating] = useState(0);
 
-  // destructure movie
+  const { movieDetails, isLoading } = useFetchMovie(selectedId);
+
+  // Destructure movie details
   const {
     Title: title,
     Year: year,
@@ -30,57 +27,34 @@ function MovieDetails({
     Genre: genre,
   } = movieDetails;
 
-  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
-  const previousRating = isWatched
-    ? watched.filter((movie) => movie.imdbID === selectedId)[0].userRating
-    : null;
+  const watchedMovie = watched.find((movie) => movie.imdbID === selectedId);
+  const isWatched = !!watchedMovie;
+  const previousRating = isWatched ? watchedMovie.userRating : null;
+  const ratingCount = isWatched ? watchedMovie.numberPrevRatings : 0;
 
   useEffect(() => {
     document.title = `Movie | ${title}`;
 
-    return () => (document.title = "usePopcorn");
+    return () => {
+      document.title = "usePopcorn";
+    };
   }, [title]);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key !== "Escape") {
-        return;
+      if (e.key === "Escape") {
+        onCloseMovie();
       }
-
-      onCloseMovie();
     };
     document.addEventListener("keydown", handleKeyPress);
 
     return () => document.removeEventListener("keydown", handleKeyPress);
-  }, []);
+  }, [onCloseMovie]);
 
-  useEffect(() => {
-    const fetchMovieDetails = async () => {
-      try {
-        setIsLoading(true);
-        setMovieDetails({}); // Reset previous movie details
-
-        const response = await fetch(
-          `${apiUrl}?apikey=${apiKey}&i=${selectedId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("An error occurred fetching the movie details");
-        }
-
-        const movieData = await response.json();
-        setMovieDetails(movieData);
-      } catch (error) {
-        console.error(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (selectedId) {
-      fetchMovieDetails();
-    }
-  }, [selectedId]);
+  const handleRateMovie = () => {
+    const newRatingCount = ratingCount + 1;
+    onAddWatchedMovie(movieDetails, rating, newRatingCount);
+  };
 
   return (
     <div className="details">
@@ -108,18 +82,22 @@ function MovieDetails({
           </header>
           <section>
             <div className="rating">
-              {isWatched && (
-                <p>
-                  You previously rated this movie {previousRating}{" "}
-                  <span>⭐️</span>
-                </p>
-              )}
+              <div className="flex flex-col justify-between">
+                {isWatched && (
+                  <p>
+                    You last rated this movie {previousRating} <span>⭐️</span>
+                  </p>
+                )}
+                {ratingCount > 0 && (
+                  <p>
+                    You have previously rated this movie {ratingCount}{" "}
+                    {`time${ratingCount > 1 ? "s" : ""}`}
+                  </p>
+                )}
+              </div>
               <StarRating maxRating={10} onSetRating={setRating} />
               {rating > 0 && (
-                <button
-                  className="btn-add"
-                  onClick={() => onAddWatchedMovie(movieDetails, rating)}
-                >
+                <button className="btn-add" onClick={handleRateMovie}>
                   {isWatched ? "Update your rating" : "+ Add to list"}
                 </button>
               )}
@@ -136,4 +114,5 @@ function MovieDetails({
     </div>
   );
 }
+
 export default MovieDetails;

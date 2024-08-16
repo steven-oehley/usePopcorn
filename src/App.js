@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import useDebounce from "./hooks/useDebounce";
 
@@ -12,52 +12,54 @@ import WatchedSummary from "./components/Main/components/WatchedSummary";
 import WatchedList from "./components/Main/components/WatchedList";
 import Loader from "./components/Main/components/Loader";
 import MovieDetails from "./components/Main/components/MovieDetails";
-
-const apiKey = process.env.REACT_APP_API_KEY;
-const apiUrl = process.env.REACT_APP_API_URL;
+import { useFetchMovies } from "./hooks/useFetchMovies";
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState("");
   const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [watched, setWatched] = useState(() => {
     const storedMovies = localStorage.getItem("watchedMovies");
-    return JSON.parse(storedMovies);
+    return storedMovies ? JSON.parse(storedMovies) : [];
   });
 
   const debouncedQuery = useDebounce(inputValue, 500);
 
   const containsId = (id) => watched.some((movie) => movie.imdbID === id);
 
-  const handleCloseMovie = () => setSelectedId(null);
+  const handleCloseMovie = useCallback(() => setSelectedId(null), []);
+
+  const { movies, isLoading, error } = useFetchMovies(query, handleCloseMovie);
 
   const handleSelectMovie = (id) =>
     selectedId === id ? setSelectedId(null) : setSelectedId(id);
 
-  const handleDuplicateRating = (movieToAdd, userRating) => {
+  const handleDuplicateRating = (movieToAdd, userRating, numRatings) => {
     setWatched((prevMovies) =>
       prevMovies.map((movie) =>
-        movie.imdbID === movieToAdd.imdbID ? { ...movie, userRating } : movie
+        movie.imdbID === movieToAdd.imdbID
+          ? { ...movie, userRating, numberPrevRatings: numRatings }
+          : movie
       )
     );
     handleCloseMovie();
   };
 
-  const handleRating = (movieToAdd, userRating) => {
-    setWatched((prevMovies) => [...prevMovies, { ...movieToAdd, userRating }]);
+  const handleRating = (movieToAdd, userRating, numRatings) => {
+    setWatched((prevMovies) => [
+      ...prevMovies,
+      { ...movieToAdd, userRating, numberPrevRatings: numRatings },
+    ]);
     handleCloseMovie();
   };
 
-  const handleAddWatchedMovie = (movieToAdd, userRating) => {
+  const handleAddWatchedMovie = (movieToAdd, userRating, numRatings) => {
     if (containsId(movieToAdd.imdbID)) {
-      handleDuplicateRating(movieToAdd, userRating);
+      handleDuplicateRating(movieToAdd, userRating, numRatings);
       return;
     }
 
-    handleRating(movieToAdd, userRating);
+    handleRating(movieToAdd, userRating, numRatings);
   };
 
   const handleDeleteMovie = (id) =>
@@ -68,33 +70,6 @@ export default function App() {
   useEffect(() => {
     setQuery(debouncedQuery); // Update the query state when debounced value changes
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    async function fetchMovies() {
-      if (!query) return; // Do nothing if query is empty
-      try {
-        setError("");
-        setIsLoading(true);
-        const response = await fetch(`${apiUrl}?apikey=${apiKey}&s=${query}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error("Something went wrong with fetching the data");
-        }
-        const data = await response.json();
-        setMovies(data.Search || []); // Ensure movies is always an array
-      } catch (error) {
-        if (error.name !== "AbortError") setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    handleCloseMovie();
-    fetchMovies();
-
-    return () => controller.abort();
-  }, [query]);
 
   useEffect(() => {
     localStorage.setItem("watchedMovies", JSON.stringify(watched));
@@ -112,7 +87,7 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box>
+        <Box key={query + movies.length1}>
           {isLoading && <Loader />}
           {!isLoading && error && <p className="error">⛔️ - {error}</p>}
           {!isLoading && !error && movies && movies.length === 0 && (

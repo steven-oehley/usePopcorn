@@ -1,8 +1,10 @@
 const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  arr.length > 0 ? arr.reduce((acc, cur) => acc + cur / arr.length, 0) : 0;
 
 function WatchedSummary({ watched }) {
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
+  const avgImdbRating = average(
+    watched.map((movie) => parseFloat(movie.imdbRating))
+  );
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(
     watched.map((movie) => {
