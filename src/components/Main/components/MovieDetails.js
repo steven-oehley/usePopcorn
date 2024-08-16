@@ -33,7 +33,7 @@ function MovieDetails({
   const ratingCount = isWatched ? watchedMovie.numberPrevRatings : 0;
 
   useEffect(() => {
-    document.title = `Movie | ${title}`;
+    if (title) document.title = `Movie | ${title}`;
 
     return () => {
       document.title = "usePopcorn";
