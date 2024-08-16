@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { createUniqueKey } from "./helpers/createUniqueKey";
 import { useDebounce } from "./hooks/useDebounce";
+import { useFetchMovies } from "./hooks/useFetchMovies";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
-import NavBar from "./components/NavBar/NavBar";
-import Main from "./components/Main/Main";
-import SearchBar from "./components/NavBar/components/SearchBar";
-import NumResults from "./components/NavBar/components/NumResults";
 import Box from "./components/Box";
-import MovieList from "./components/Main/components/MovieList";
-import WatchedSummary from "./components/Main/components/WatchedSummary";
-import WatchedList from "./components/Main/components/WatchedList";
 import Loader from "./components/Main/components/Loader";
+import Main from "./components/Main/Main";
 import MovieDetails from "./components/Main/components/MovieDetails";
-import { useFetchMovies } from "./hooks/useFetchMovies";
+import MovieList from "./components/Main/components/MovieList";
+import NavBar from "./components/NavBar/NavBar";
+import NumResults from "./components/NavBar/components/NumResults";
+import SearchBar from "./components/NavBar/components/SearchBar";
+import WatchedList from "./components/Main/components/WatchedList";
+import WatchedSummary from "./components/Main/components/WatchedSummary";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -81,7 +82,7 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box key={query + movies.length1}>
+        <Box key={createUniqueKey}>
           {isLoading && <Loader />}
           {!isLoading && error && <p className="error">⛔️ - {error}</p>}
           {!isLoading && !error && movies && movies.length === 0 && (
